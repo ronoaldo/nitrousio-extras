@@ -1,0 +1,19 @@
+{
+	"manifest_version": 2,
+	
+	"name": "Nitrous.IO Extras",
+	"description": "Some goodies for Nitrous.IO Users",
+	"version": "1.0",
+	
+	"permissions": [
+		"https://www.nitrous.io/"
+	],
+	
+	"content_scripts": [
+		{
+			"matches": ["https://www.nitrous.io/*"],
+			"css": ["app.css"],
+			"js": ["app.js"]
+		}
+	]
+}
