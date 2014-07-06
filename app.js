@@ -1,18 +1,18 @@
 /*
-* IDE is the binding implementations of the IDE customized actions.
-*/
+ * IDE is the binding implementations of the IDE customized actions.
+ */
 var IDE = {};
 
 /*
-* Adds a new menu entry using the specified name and items.
-* Items must be an array of objects with a label and url properties.
-*/
+ * addMenu function adds a new menu entry using the specified name and items.
+ * Items must be an array of objects with a label and url properties.
+ */
 IDE.addMenu = function addMenu(id, name, items) {
 	if (document.getElementById(id)) {
 		console.log("Menu entry " + id + " already added.");
 		return
 	}
-	
+
 	var ul = document.createElement("ul");
 	ul.setAttribute("class", "ember-view dropdown-menu");
 	for (var i = 0; i< items.length; i++) {
@@ -45,34 +45,74 @@ IDE.addMenu = function addMenu(id, name, items) {
 	entry.setAttribute("class", "dropdown");
 	entry.appendChild(label);
 	entry.appendChild(ul);
-	
+
 	var m = document.getElementById("ide_main_menu_view");
 	m.getElementsByTagName("ul")[0].appendChild(entry);
 }
 
-/*
-* onHashChange function is the event handler for the event change in the URL.
+var confRe = /"entryCouponCode"(.*|[\s\S]*)\}[\s\S]*\}/;
+/**
+* conf function returns the configuration available in the host 
+* page initialization script.
 */
+IDE.conf = function conf() {
+	if (!IDE._conf) {
+		IDE._conf = {};
+		var scripts = document.getElementsByTagName("script");
+		for (var i = 0 ; i < scripts.length ; i++) {
+			if (scripts[i].innerText.indexOf("App.bootstrap") >= 0) {
+				var scriptData = scripts[i].innerText;
+				if (scriptData.match(confRe)) {
+					var confStr = '{"entryCouponCode"' + scriptData.match(confRe)[1] + '}';
+					try {
+						IDE._conf = JSON.parse(confStr);
+					} catch (e) {
+						console.log("Error loading configuration from host page.");
+						console.log(e);
+					}
+				}
+			}
+		}
+	}
+	return IDE._conf;
+}
+
+/**
+* customDomain function returns the custom domain of the box in the current URL.
+*/
+IDE.customDomain = function customDomain() {
+	var box = window.location.hash.match(/^#\/boxes\/(\d+)/);
+	if (box) {
+		box = box[1];
+		var boxes = IDE.conf().boxes;
+		for (var i = 0 ; i < boxes.length ; i++) {
+			console.log("Looking up box configuration from: " + JSON.stringify(boxes[i]));
+			if (box === boxes[i].id.toString()) {
+				console.log("Found box: " + JSON.stringify(boxes[i]));
+				return boxes[i].custom_domain;
+			}
+		}
+	}
+	return null;
+}
+
+/*
+ * onHashChange function is the event handler for the event change in the URL.
+ */
 function onHashChange() {
 	if (/^#\/boxes\//.test(window.location.hash)) {
-		IDE.addMenu("custom-domain", "Custom Domain", [
-			{
-				"label": "Port 3000",
-				"url": "http://dev.ronoaldo.net:3000"
-			},{
-				"label": "Port 4000",
-				"url": "http://dev.ronoaldo.net:4000"
-			},{
-				"label": "Port 8000",
-				"url": "http://dev.ronoaldo.net:8000"
-			},{
-				"label": "Port 8080",
-				"url": "http://dev.ronoaldo.net:8080"
-			},{
-				"label": "Port 8888",
-				"url": "http://dev.ronoaldo.net:8888"
+		var domain = IDE.customDomain();
+		if (domain) {
+			var custom = [];
+			var ports = ["3000", "4000", "8000", "8080", "8888"];
+			for (var i = 0 ; i < ports.length; i++) {
+				custom.push({
+					"label": domain + ":" + ports[i],
+					"url": "http://" + domain + ":" + ports[i]
+				});
 			}
-		]);
+			IDE.addMenu("more-options", "More", custom);
+		}
 	}
 }
 
