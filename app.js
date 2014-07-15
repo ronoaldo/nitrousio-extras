@@ -81,9 +81,8 @@ IDE.conf = function conf() {
 * customDomain function returns the custom domain of the box in the current URL.
 */
 IDE.customDomain = function customDomain() {
-	var box = window.location.hash.match(/^#\/boxes\/(\d+)/);
+	var box = IDE.currentBoxId();
 	if (box) {
-		box = box[1];
 		var boxes = IDE.conf().boxes;
 		for (var i = 0 ; i < boxes.length ; i++) {
 			console.log("Looking up box configuration from: " + JSON.stringify(boxes[i]));
@@ -96,23 +95,42 @@ IDE.customDomain = function customDomain() {
 	return null;
 }
 
+/**
+* Returns the current box ID
+*/
+IDE.currentBoxId = function currentBoxId() {
+	var box = window.location.hash.match(/^#\/boxes\/(\d+)/);
+	if (box) {
+		return box[1];
+	}
+	return undefined;
+}
+
 /*
  * onHashChange function is the event handler for the event change in the URL.
  */
 function onHashChange() {
 	if (/^#\/boxes\//.test(window.location.hash)) {
 		var domain = IDE.customDomain();
+		var custom = [];
 		if (domain) {
-			var custom = [];
 			var ports = ["3000", "4000", "8000", "8080", "8888"];
 			for (var i = 0 ; i < ports.length; i++) {
 				custom.push({
-					"label": domain + ":" + ports[i],
+					"label": "Port " + ports[i],
 					"url": "http://" + domain + ":" + ports[i]
 				});
 			}
-			IDE.addMenu("more-options", "More", custom);
 		}
+		custom.push({
+			"label": "------------------",
+			"url": ""
+		})
+		custom.push({
+			"label": "Configure custom domain ...",
+			"url": "/app#/boxes/" + IDE.currentBoxId() + "/domains"
+		})
+		IDE.addMenu("custom-domain", "Custom Domain", custom);
 	}
 }
 
