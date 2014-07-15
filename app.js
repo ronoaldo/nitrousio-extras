@@ -28,6 +28,10 @@ IDE.addMenu = function addMenu(id, name, items) {
 		a.target = "_blank";
 		a.appendChild(fa);
 		a.appendChild(s);
+		a.addEventListener("click", function() {
+			// Hides the menu when the entry is clicked
+			document.getElementById(id).setAttribute("class", "dropdown");
+		});
 
 		var li = document.createElement("li");
 		li.setAttribute("class", "ember-view");
