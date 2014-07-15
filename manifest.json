@@ -3,7 +3,7 @@
 	
 	"name": "Nitrous.IO Extra Tools",
 	"description": "Some extra functions for Nitrous.IO users.",
-	"version": "1.0",
+	"version": "1.0.1",
 	
 	"permissions": [
 		"https://www.nitrous.io/"
